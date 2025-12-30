@@ -1,0 +1,50 @@
+{
+    "name": "@issadicko/kodi-editor-language-service",
+    "version": "0.0.1",
+    "description": "KodiScript language services: completion, diagnostics, hover",
+    "main": "dist/index.js",
+    "module": "dist/index.mjs",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+        "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "clean": "rm -rf dist"
+    },
+    "keywords": [
+        "kodiscript",
+        "monaco",
+        "editor",
+        "lsp",
+        "completion",
+        "diagnostics"
+    ],
+    "author": "Issa Hamadou Dicko",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/issadicko/kodi-script.git",
+        "directory": "kodi-editor/packages/language-service"
+    },
+    "homepage": "https://github.com/issadicko/kodi-script/tree/main/kodi-editor#readme",
+    "bugs": {
+        "url": "https://github.com/issadicko/kodi-script/issues"
+    },
+    "dependencies": {
+        "@issadicko/kodi-script": "^0.0.1",
+        "@issadicko/kodi-editor-language": "^0.0.1"
+    },
+    "peerDependencies": {
+        "monaco-editor": ">=0.40.0"
+    },
+    "devDependencies": {
+        "monaco-editor": "^0.52.0",
+        "tsup": "^8.0.1",
+        "typescript": "^5.3.3",
+        "vitest": "^1.2.0"
+    }
+}

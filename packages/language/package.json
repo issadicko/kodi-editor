@@ -1,0 +1,44 @@
+{
+    "name": "@issadicko/kodi-editor-language",
+    "version": "0.0.1",
+    "description": "KodiScript language definition for Monaco Editor",
+    "main": "dist/index.js",
+    "module": "dist/index.mjs",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+        "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "clean": "rm -rf dist"
+    },
+    "keywords": [
+        "kodiscript",
+        "monaco",
+        "editor",
+        "syntax-highlighting"
+    ],
+    "author": "Issa Hamadou Dicko",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/issadicko/kodi-script.git",
+        "directory": "kodi-editor/packages/language"
+    },
+    "homepage": "https://github.com/issadicko/kodi-script/tree/main/kodi-editor#readme",
+    "bugs": {
+        "url": "https://github.com/issadicko/kodi-script/issues"
+    },
+    "peerDependencies": {
+        "monaco-editor": ">=0.40.0"
+    },
+    "devDependencies": {
+        "monaco-editor": "^0.52.0",
+        "tsup": "^8.0.1",
+        "typescript": "^5.3.3",
+        "vitest": "^1.2.0"
+    }
+}

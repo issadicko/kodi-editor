@@ -1,0 +1,22 @@
+{
+    "name": "kodi-editor",
+    "version": "0.0.1",
+    "private": true,
+    "description": "Specialized code editor for KodiScript language",
+    "workspaces": [
+        "packages/*",
+        "apps/*"
+    ],
+    "scripts": {
+        "build": "npm run build --workspaces --if-present",
+        "build:language": "npm run build -w @issadicko/kodi-editor-language",
+        "build:service": "npm run build -w @issadicko/kodi-editor-language-service",
+        "build:angular": "npm run build -w @issadicko/kodi-editor-angular",
+        "test": "npm run test --workspaces --if-present",
+        "clean": "npm run clean --workspaces --if-present && rm -rf node_modules"
+    },
+    "devDependencies": {
+        "turbo": "^2.3.3",
+        "typescript": "^5.3.3"
+    }
+}

@@ -1,0 +1,76 @@
+<div class="demo-container" [class.light]="theme === 'kodi-light'">
+  <header class="demo-header">
+    <div class="header-content">
+      <h1>🚀 KodiScript Editor</h1>
+      <p class="subtitle">A modern code editor for KodiScript language</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" (click)="toggleTheme()">
+        {{ theme === 'kodi-dark' ? '☀️ Light' : '🌙 Dark' }}
+      </button>
+      <button class="btn btn-outline" (click)="clearCode()">
+        Clear
+      </button>
+    </div>
+  </header>
+
+  <main class="demo-main">
+    <div class="editor-section">
+      <div class="section-header">
+        <span class="badge">Editor</span>
+        <span class="char-count">{{ code.length }} chars</span>
+      </div>
+      
+      <kodi-editor
+        [(ngModel)]="code"
+        [theme]="theme"
+        [height]="'500px'"
+        [options]="{ minimap: true, fontSize: 14 }"
+        (validationErrors)="onValidationErrors($event)">
+      </kodi-editor>
+    </div>
+
+    <aside class="sidebar">
+      <div class="panel errors-panel">
+        <h3>
+          📋 Diagnostics
+          <span class="count" [class.has-errors]="errors.length > 0">
+            {{ errors.length }}
+          </span>
+        </h3>
+        
+        @if (errors.length === 0) {
+          <div class="no-errors">
+            ✅ No issues found
+          </div>
+        } @else {
+          <ul class="error-list">
+            @for (error of errors; track error) {
+              <li class="error-item" [class]="error.severity">
+                <span class="error-location">Line {{ error.line }}</span>
+                <span class="error-message">{{ error.message }}</span>
+                <span class="error-badge">{{ error.severity }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <div class="panel features-panel">
+        <h3>✨ Features</h3>
+        <ul class="feature-list">
+          <li>🎨 Syntax Highlighting</li>
+          <li>✅ Real-time Validation</li>
+          <li>💡 Autocompletion</li>
+          <li>📖 Hover Documentation</li>
+          <li>🌓 Dark/Light Themes</li>
+          <li>📝 ngModel Support</li>
+        </ul>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="demo-footer">
+    <p>Built with <strong>Monaco Editor</strong> + <strong>Angular</strong></p>
+  </footer>
+</div>
