@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import * as monaco from 'monaco-editor';
 import {
   registerKodiScriptLanguage,
@@ -6,7 +6,7 @@ import {
   THEME_DARK,
   THEME_LIGHT,
 } from '@issadicko/kodi-editor-language';
-import { KodiScript } from '@issadicko/kodi-script';
+import { KodiScript, Lexer, Parser } from '@issadicko/kodi-script';
 import './App.css';
 
 // Register language once
@@ -28,14 +28,37 @@ let b = 10
 print("Sum: " + (a + b))
 `;
 
+interface ParseError {
+  message: string;
+  line?: number;
+}
+
 function App() {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [output, setOutput] = useState<string[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [runtimeError, setRuntimeError] = useState<string | null>(null);
+  const [parseErrors, setParseErrors] = useState<ParseError[]>([]);
   const [cursorPosition, setCursorPosition] = useState({ line: 1, column: 1 });
   const [lineCount, setLineCount] = useState(0);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Validate code on change (debounced)
+  const validateCode = useCallback((code: string) => {
+    try {
+      const lexer = new Lexer(code);
+      const tokens = lexer.tokenize();
+      const parser = new Parser(tokens);
+      parser.parse();
+      setParseErrors([]);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      // Try to extract line number from error message
+      const lineMatch = message.match(/line (\d+)/i);
+      const line = lineMatch ? parseInt(lineMatch[1], 10) : undefined;
+      setParseErrors([{ message, line }]);
+    }
+  }, []);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -63,20 +86,32 @@ function App() {
     editorRef.current = editor;
     setLineCount(editor.getModel()?.getLineCount() || 0);
 
+    // Initial validation
+    validateCode(DEFAULT_CODE);
+
     // Listen for cursor position changes
     editor.onDidChangeCursorPosition((e) => {
       setCursorPosition({ line: e.position.lineNumber, column: e.position.column });
     });
 
-    // Listen for content changes
+    // Listen for content changes - validate in real-time
+    let debounceTimer: ReturnType<typeof setTimeout>;
     editor.onDidChangeModelContent(() => {
+      const code = editor.getValue();
       setLineCount(editor.getModel()?.getLineCount() || 0);
+
+      // Debounce validation to avoid too many calls
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        validateCode(code);
+      }, 300);
     });
 
     return () => {
+      clearTimeout(debounceTimer);
       editor.dispose();
     };
-  }, []);
+  }, [validateCode]);
 
   // Update theme
   useEffect(() => {
@@ -87,21 +122,24 @@ function App() {
     if (!editorRef.current) return;
 
     const code = editorRef.current.getValue();
-    setError(null);
+    setRuntimeError(null);
 
     try {
       const result = KodiScript.run(code);
       setOutput(result.output);
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setRuntimeError(e instanceof Error ? e.message : String(e));
       setOutput([]);
     }
   };
 
   const handleClear = () => {
     setOutput([]);
-    setError(null);
+    setRuntimeError(null);
   };
+
+  const hasErrors = parseErrors.length > 0 || runtimeError !== null;
+  const errorCount = parseErrors.length + (runtimeError ? 1 : 0);
 
   return (
     <div className={`app ${theme}`}>
@@ -128,9 +166,9 @@ function App() {
           <div className="editor-container" ref={containerRef} />
           <div className="status-bar">
             <div className="status-left">
-              {error ? (
+              {hasErrors ? (
                 <span className="status-error">
-                  <span className="error-dot" /> Error
+                  <span className="error-dot" /> {errorCount} Error{errorCount > 1 ? 's' : ''}
                 </span>
               ) : (
                 <span className="status-ok">
@@ -150,13 +188,22 @@ function App() {
         <div className="output-panel">
           <h3>Output</h3>
           <div className="output-content">
-            {error ? (
-              <div className="error">{error}</div>
+            {parseErrors.length > 0 && (
+              <div className="error-list">
+                {parseErrors.map((err, i) => (
+                  <div key={i} className="error">
+                    {err.line && <span className="error-line">Line {err.line}:</span>} {err.message}
+                  </div>
+                ))}
+              </div>
+            )}
+            {runtimeError ? (
+              <div className="error">{runtimeError}</div>
             ) : output.length > 0 ? (
               output.map((line, i) => <div key={i}>{line}</div>)
-            ) : (
+            ) : parseErrors.length === 0 ? (
               <div className="placeholder">Click "Run" to execute the script...</div>
-            )}
+            ) : null}
           </div>
         </div>
       </main>
