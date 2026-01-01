@@ -1,6 +1,6 @@
 {
     "name": "@issadicko/kodi-editor-language-service",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "description": "KodiScript language services: completion, diagnostics, hover",
     "main": "dist/index.js",
     "module": "dist/index.mjs",
@@ -35,8 +35,8 @@
         "url": "https://github.com/issadicko/kodi-script/issues"
     },
     "dependencies": {
-        "@issadicko/kodi-script": "^0.0.1",
-        "@issadicko/kodi-editor-language": "^0.0.1"
+        "@issadicko/kodi-script": "^0.1.1",
+        "@issadicko/kodi-editor-language": "^0.1.0"
     },
     "peerDependencies": {
         "monaco-editor": ">=0.40.0"
