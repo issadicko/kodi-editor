@@ -20,14 +20,29 @@
         <span class="badge">Editor</span>
         <span class="char-count">{{ code.length }} chars</span>
       </div>
-      
-      <kodi-editor
-        [(ngModel)]="code"
-        [theme]="theme"
-        [height]="'500px'"
-        [options]="{ minimap: true, fontSize: 14 }"
+
+      <kodi-editor [(ngModel)]="code" [theme]="theme" [height]="'500px'" [options]="{ minimap: true, fontSize: 14 }"
         (validationErrors)="onValidationErrors($event)">
       </kodi-editor>
+
+      <div class="status-bar">
+        <div class="status-left">
+          @if (errors.length > 0) {
+          <span class="status-error">
+            <span class="error-dot"></span> {{ errors.length }} Error(s)
+          </span>
+          } @else {
+          <span class="status-ok">
+            <span class="ok-dot"></span> Ready
+          </span>
+          }
+        </div>
+        <div class="status-right">
+          <span class="status-item">{{ code.length }} chars</span>
+          <span class="status-item">KodiScript</span>
+          <span class="status-item">SDK v0.1.1</span>
+        </div>
+      </div>
     </div>
 
     <aside class="sidebar">
@@ -38,21 +53,21 @@
             {{ errors.length }}
           </span>
         </h3>
-        
+
         @if (errors.length === 0) {
-          <div class="no-errors">
-            ✅ No issues found
-          </div>
+        <div class="no-errors">
+          ✅ No issues found
+        </div>
         } @else {
-          <ul class="error-list">
-            @for (error of errors; track error) {
-              <li class="error-item" [class]="error.severity">
-                <span class="error-location">Line {{ error.line }}</span>
-                <span class="error-message">{{ error.message }}</span>
-                <span class="error-badge">{{ error.severity }}</span>
-              </li>
-            }
-          </ul>
+        <ul class="error-list">
+          @for (error of errors; track error) {
+          <li class="error-item" [class]="error.severity">
+            <span class="error-location">Line {{ error.line }}</span>
+            <span class="error-message">{{ error.message }}</span>
+            <span class="error-badge">{{ error.severity }}</span>
+          </li>
+          }
+        </ul>
         }
       </div>
 

@@ -12,6 +12,8 @@ import './App.css';
 // Register language once
 let languageRegistered = false;
 
+const SDK_VERSION = '0.1.1';
+
 const DEFAULT_CODE = `let name = "World"
 print("Hello " + name)
 
@@ -30,6 +32,8 @@ function App() {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [output, setOutput] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [cursorPosition, setCursorPosition] = useState({ line: 1, column: 1 });
+  const [lineCount, setLineCount] = useState(0);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -57,6 +61,17 @@ function App() {
     });
 
     editorRef.current = editor;
+    setLineCount(editor.getModel()?.getLineCount() || 0);
+
+    // Listen for cursor position changes
+    editor.onDidChangeCursorPosition((e) => {
+      setCursorPosition({ line: e.position.lineNumber, column: e.position.column });
+    });
+
+    // Listen for content changes
+    editor.onDidChangeModelContent(() => {
+      setLineCount(editor.getModel()?.getLineCount() || 0);
+    });
 
     return () => {
       editor.dispose();
@@ -109,7 +124,28 @@ function App() {
       </header>
 
       <main className="main">
-        <div className="editor-container" ref={containerRef} />
+        <div className="editor-wrapper">
+          <div className="editor-container" ref={containerRef} />
+          <div className="status-bar">
+            <div className="status-left">
+              {error ? (
+                <span className="status-error">
+                  <span className="error-dot" /> Error
+                </span>
+              ) : (
+                <span className="status-ok">
+                  <span className="ok-dot" /> Ready
+                </span>
+              )}
+            </div>
+            <div className="status-right">
+              <span className="status-item">Ln {cursorPosition.line}, Col {cursorPosition.column}</span>
+              <span className="status-item">{lineCount} lines</span>
+              <span className="status-item">KodiScript</span>
+              <span className="status-item">SDK v{SDK_VERSION}</span>
+            </div>
+          </div>
+        </div>
 
         <div className="output-panel">
           <h3>Output</h3>
