@@ -1,6 +1,6 @@
 {
     "name": "@issadicko/kodi-editor-language-service",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "KodiScript language services: completion, diagnostics, hover",
     "main": "dist/index.js",
     "module": "dist/index.mjs",
