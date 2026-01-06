@@ -151,7 +151,7 @@ export class DiagnosticsService {
         // Keywords and native functions to skip
         const keywords = new Set([
             'let', 'if', 'else', 'return', 'true', 'false', 'null',
-            'and', 'or', 'not', 'fn'
+            'and', 'or', 'not', 'fn', 'for', 'in', 'while'
         ]);
         const natives = new Set([
             'json', 'parseJson', 'base64Encode', 'base64Decode', 'urlEncode', 'urlDecode',

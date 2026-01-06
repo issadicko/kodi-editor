@@ -1,6 +1,6 @@
 {
     "name": "@issadicko/kodi-editor-angular",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "KodiScript editor component for Angular applications",
     "author": "Issa Hamadou Dicko",
     "license": "MIT",
@@ -27,8 +27,8 @@
         "monaco-editor": ">=0.40.0"
     },
     "dependencies": {
-        "@issadicko/kodi-editor-language": "^0.0.1",
-        "@issadicko/kodi-editor-language-service": "^0.0.1",
+        "@issadicko/kodi-editor-language": "^0.1.2",
+        "@issadicko/kodi-editor-language-service": "^0.1.2",
         "tslib": "^2.6.0"
     },
     "devDependencies": {
@@ -39,7 +39,6 @@
         "@angular/forms": "^20.0.0",
         "@angular/platform-browser": "^20.0.0",
         "@angular/platform-browser-dynamic": "^20.0.0",
-        "@esbuild/darwin-arm64": "^0.27.2",
         "monaco-editor": "^0.52.0",
         "ng-packagr": "^20.0.0",
         "rxjs": "^7.8.0",

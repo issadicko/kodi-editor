@@ -165,6 +165,9 @@ export const KEYWORDS = [
     { name: 'or', description: 'Logical OR operator' },
     { name: 'not', description: 'Logical NOT operator' },
     { name: 'fn', description: 'Define a function literal' },
+    { name: 'for', description: 'For-in loop statement' },
+    { name: 'in', description: 'Iterate over collection' },
+    { name: 'while', description: 'While loop statement' },
 ];
 
 /**
@@ -206,6 +209,18 @@ export const SNIPPETS = [
         detail: 'If-else if-else chain',
         documentation: 'Multiple condition branches',
         insertText: 'if (${1:condition1}) {\n\t${2:// branch 1}\n} else if (${3:condition2}) {\n\t${4:// branch 2}\n} else {\n\t${5:// default}\n}',
+    },
+    {
+        label: 'for',
+        detail: 'For-in loop',
+        documentation: 'Iterate over array or object keys',
+        insertText: 'for (${1:item} in ${2:collection}) {\n\t$0\n}',
+    },
+    {
+        label: 'while',
+        detail: 'While loop',
+        documentation: 'Execute block while condition is true',
+        insertText: 'while (${1:condition}) {\n\t$0\n}',
     },
     {
         label: 'ternary',

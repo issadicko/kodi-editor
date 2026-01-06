@@ -8,7 +8,7 @@ export const kodiScriptMonarch: languages.IMonarchLanguage = {
     defaultToken: 'invalid',
     tokenPostfix: '.kodi',
 
-    keywords: ['let', 'if', 'else', 'return', 'and', 'or', 'not'],
+    keywords: ['let', 'if', 'else', 'return', 'and', 'or', 'not', 'fn', 'for', 'in', 'while'],
 
     literals: ['true', 'false', 'null'],
 
