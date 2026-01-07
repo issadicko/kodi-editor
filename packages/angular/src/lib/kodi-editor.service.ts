@@ -1,6 +1,6 @@
 import { Injectable, Inject, InjectionToken, Optional, OnDestroy } from '@angular/core';
 import type { Monaco } from '@issadicko/kodi-editor-language';
-import { registerKodiScriptLanguage, THEME_DARK } from '@issadicko/kodi-editor-language';
+import { registerKodiScriptLanguage as registerLanguage, THEME_DARK } from '@issadicko/kodi-editor-language';
 import { registerKodiScriptServices, DiagnosticsService } from '@issadicko/kodi-editor-language-service';
 
 /**
@@ -43,19 +43,26 @@ export class KodiEditorService implements OnDestroy {
     ) { }
 
     /**
-     * Loads Monaco Editor and registers KodiScript language.
+     * Loads Monaco Editor and optionally registers KodiScript language.
      * Returns the same Promise on subsequent calls.
+     * 
+     * @param registerKodiScript - Whether to register KodiScript language (default: true)
      */
-    async loadMonaco(): Promise<Monaco> {
+    async loadMonaco(registerKodiScript: boolean = true): Promise<Monaco> {
         if (this.monacoPromise) {
+            // If already loaded but KodiScript not registered yet, register it now if needed
+            if (registerKodiScript && !this.isRegistered) {
+                const monaco = await this.monacoPromise;
+                this.registerKodiScriptLanguage(monaco);
+            }
             return this.monacoPromise;
         }
 
-        this.monacoPromise = this.doLoadMonaco();
+        this.monacoPromise = this.doLoadMonaco(registerKodiScript);
         return this.monacoPromise;
     }
 
-    private async doLoadMonaco(): Promise<Monaco> {
+    private async doLoadMonaco(registerKodiScript: boolean): Promise<Monaco> {
         let monaco: Monaco;
 
         if (this.customLoader) {
@@ -65,13 +72,20 @@ export class KodiEditorService implements OnDestroy {
             monaco = await this.loadMonacoAMD();
         }
 
-        if (!this.isRegistered) {
-            registerKodiScriptLanguage(monaco);
-            this.diagnosticsService = registerKodiScriptServices(monaco);
-            this.isRegistered = true;
+        if (registerKodiScript && !this.isRegistered) {
+            this.registerKodiScriptLanguage(monaco);
         }
 
         return monaco;
+    }
+
+    /**
+     * Registers KodiScript language and services with Monaco.
+     */
+    private registerKodiScriptLanguage(monaco: Monaco): void {
+        registerLanguage(monaco);
+        this.diagnosticsService = registerKodiScriptServices(monaco);
+        this.isRegistered = true;
     }
 
     /**

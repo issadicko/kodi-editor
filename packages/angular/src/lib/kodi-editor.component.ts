@@ -18,7 +18,7 @@ import { KodiEditorService } from './kodi-editor.service';
 import { DiagnosticError } from '@issadicko/kodi-editor-language-service';
 import { LANGUAGE_ID, THEME_DARK, THEME_LIGHT } from '@issadicko/kodi-editor-language';
 
-export type KodiEditorTheme = 'kodi-dark' | 'kodi-light';
+export type KodiEditorTheme = 'kodi-dark' | 'kodi-light' | 'vs' | 'vs-dark' | 'hc-black';
 
 export interface KodiEditorOptions {
     readOnly?: boolean;
@@ -84,6 +84,13 @@ export class KodiEditorComponent implements OnInit, AfterViewInit, OnDestroy, Co
     /** Additional editor options */
     @Input() options: KodiEditorOptions = {};
 
+    /**
+     * Language to use for syntax highlighting.
+     * Use 'kodiscript' for KodiScript (default), or any Monaco-supported language
+     * like 'html', 'sql', 'javascript', 'typescript', 'css', 'json', etc.
+     */
+    @Input() language: string = LANGUAGE_ID;
+
     /** Validation debounce time in ms */
     @Input() validationDelay = 500;
 
@@ -125,14 +132,14 @@ export class KodiEditorComponent implements OnInit, AfterViewInit, OnDestroy, Co
     }
 
     private async initEditor(): Promise<void> {
-        const monaco = await this.editorService.loadMonaco();
+        const monaco = await this.editorService.loadMonaco(this.isKodiScriptLanguage());
 
         // Run outside Angular zone for performance
         this.ngZone.runOutsideAngular(() => {
             const editorOptions: editor.IStandaloneEditorConstructionOptions = {
                 value: this.value,
-                language: LANGUAGE_ID,
-                theme: this.theme === 'kodi-light' ? THEME_LIGHT : THEME_DARK,
+                language: this.language,
+                theme: this.resolveTheme(),
                 automaticLayout: true,
                 readOnly: this.options.readOnly ?? false,
                 minimap: { enabled: this.options.minimap ?? false },
@@ -194,6 +201,11 @@ export class KodiEditorComponent implements OnInit, AfterViewInit, OnDestroy, Co
      * Validates the current editor content.
      */
     async validate(): Promise<DiagnosticError[]> {
+        // Only validate KodiScript code
+        if (!this.isKodiScriptLanguage()) {
+            return [];
+        }
+
         const diagnosticsService = this.editorService.getDiagnosticsService();
         if (!diagnosticsService || !this.editor) {
             return [];
@@ -207,6 +219,30 @@ export class KodiEditorComponent implements OnInit, AfterViewInit, OnDestroy, Co
         const errors = await diagnosticsService.validate(model);
         this.validationErrors.emit(errors);
         return errors;
+    }
+
+    /**
+     * Checks if the current language is KodiScript.
+     */
+    private isKodiScriptLanguage(): boolean {
+        return this.language === LANGUAGE_ID || this.language === 'kodiscript';
+    }
+
+    /**
+     * Resolves the theme based on language and theme input.
+     */
+    private resolveTheme(): string {
+        if (this.isKodiScriptLanguage()) {
+            return this.theme === 'kodi-light' ? THEME_LIGHT : THEME_DARK;
+        }
+        // For non-KodiScript languages, use standard Monaco themes
+        if (this.theme === 'kodi-dark' || this.theme === 'vs-dark') {
+            return 'vs-dark';
+        }
+        if (this.theme === 'kodi-light' || this.theme === 'vs') {
+            return 'vs';
+        }
+        return this.theme;
     }
 
     /**

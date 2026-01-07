@@ -1,6 +1,6 @@
 {
     "name": "@issadicko/kodi-editor-angular",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "description": "KodiScript editor component for Angular applications",
     "author": "Issa Hamadou Dicko",
     "license": "MIT",
