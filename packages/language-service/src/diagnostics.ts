@@ -1,5 +1,9 @@
 import type { editor } from 'monaco-editor';
 import type { Monaco } from '@issadicko/kodi-editor-language';
+import { KEYWORDS, NATIVE_FUNCTIONS } from './completion';
+
+const KEYWORD_NAMES = new Set(KEYWORDS.map(kw => kw.name));
+const NATIVE_NAMES = new Set(NATIVE_FUNCTIONS.map(fn => fn.name));
 
 export interface DiagnosticError {
     line: number;
@@ -125,7 +129,7 @@ export class DiagnosticsService {
         const lines = code.split('\n');
         const declaredVars = new Set<string>();
 
-        // First pass: collect variable declarations
+        // First pass: collect the names that let, fn, for and catch declare
         for (const line of lines) {
             // Match let declarations: let x = ...
             const letMatch = line.match(/\blet\s+([a-zA-Z_]\w*)\s*=/);
@@ -133,32 +137,24 @@ export class DiagnosticsService {
                 declaredVars.add(letMatch[1]);
             }
 
-            // Match function parameters: fn (param1, param2) or fn(x)
-            // This handles anonymous functions with parameters
-            const fnMatch = line.match(/\bfn\s*\(([^)]*)\)/);
-            if (fnMatch && fnMatch[1]) {
-                const params = fnMatch[1].split(',').map(p => p.trim()).filter(Boolean);
-                for (const param of params) {
-                    // Extract just the identifier (in case of typed params in future)
-                    const paramName = param.match(/^([a-zA-Z_]\w*)/);
+            // fn(a, b) and fn name(a, b): the name and the parameters, every function of the line
+            for (const fnMatch of line.matchAll(/\bfn\s*([a-zA-Z_]\w*)?\s*\(([^)]*)\)/g)) {
+                if (fnMatch[1]) {
+                    declaredVars.add(fnMatch[1]);
+                }
+                for (const param of fnMatch[2].split(',')) {
+                    const paramName = param.trim().match(/^([a-zA-Z_]\w*)/);
                     if (paramName) {
                         declaredVars.add(paramName[1]);
                     }
                 }
             }
-        }
 
-        // Keywords and native functions to skip
-        const keywords = new Set([
-            'let', 'if', 'else', 'return', 'true', 'false', 'null',
-            'and', 'or', 'not', 'fn', 'for', 'in', 'while'
-        ]);
-        const natives = new Set([
-            'json', 'parseJson', 'base64Encode', 'base64Decode', 'urlEncode', 'urlDecode',
-            'toString', 'toNumber', 'print', 'length', 'substring', 'upper', 'lower',
-            'trim', 'split', 'join', 'keys', 'values', 'contains', 'replace',
-            'abs', 'round', 'floor', 'ceil'
-        ]);
+            // for (item in list) and catch (e)
+            for (const bound of line.matchAll(/\b(?:for\s*\(\s*([a-zA-Z_]\w*)\s+in\b|catch\s*\(\s*([a-zA-Z_]\w*)\s*\))/g)) {
+                declaredVars.add(bound[1] ?? bound[2]);
+            }
+        }
 
         // Second pass: check for undefined variable usage
         const reported = new Set<string>();
@@ -203,7 +199,7 @@ export class DiagnosticsService {
                 if (afterMatch.match(/^\s*\(/)) continue;
 
                 // Skip keywords, natives, and declared vars
-                if (keywords.has(name) || natives.has(name) || declaredVars.has(name)) continue;
+                if (KEYWORD_NAMES.has(name) || NATIVE_NAMES.has(name) || declaredVars.has(name)) continue;
 
                 // Report only once per variable name
                 if (!reported.has(name)) {
